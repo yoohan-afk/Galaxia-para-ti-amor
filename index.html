@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Galaxia Nathan</title>
+
+<style>
+body{
+    margin:0;
+    overflow:hidden;
+    background:black;
+    font-family: Arial, Helvetica, sans-serif;
+}
+#mensaje{
+    position:absolute;
+    top:20px;
+    width:100%;
+    text-align:center;
+    color:white;
+    font-size:28px;
+    font-weight:bold;
+}
+</style>
+</head>
+
+<body>
+
+<div id="mensaje">Nathan 💛 eres mi chico hermoso</div>
+<canvas id="canvas"></canvas>
+
+<script>
+const canvas = document.getElementById("canvas");
+const ctx = canvas.getContext("2d");
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
+
+/* estrellas */
+let stars=[];
+for(let i=0;i<900;i++){
+    stars.push({
+        x:Math.random()*canvas.width-canvas.width/2,
+        y:Math.random()*canvas.height-canvas.height/2,
+        z:Math.random()*1500
+    });
+}
+
+/* palabras románticas */
+let words=[
+"hermoso","mi niño","mi amor","mi cielo",
+"mi príncipe","mi rey","mi bebé",
+"te adoro","te quiero","mi vida",
+"mi universo","mi chico","mi todo"
+];
+
+let angle=0;
+
+function draw(){
+    ctx.fillStyle="black";
+    ctx.fillRect(0,0,canvas.width,canvas.height);
+
+    /* estrellas */
+    for(let i=0;i<stars.length;i++){
+        let s=stars[i];
+        s.z-=2;
+        if(s.z<=0)s.z=1500;
+
+        let k=300/s.z;
+        let x=s.x*k+canvas.width/2;
+        let y=s.y*k+canvas.height/2;
+
+        ctx.fillStyle="white";
+        ctx.fillRect(x,y,2,2);
+    }
+
+    let cx=canvas.width/2;
+    let cy=canvas.height/2+80;
+
+    /* planeta */
+    ctx.beginPath();
+    ctx.arc(cx,cy,90,0,Math.PI*2);
+    ctx.fillStyle="#b66cff";
+    ctx.fill();
+
+    /* nombre */
+    ctx.fillStyle="white";
+    ctx.font="bold 32px Arial";
+    ctx.textAlign="center";
+    ctx.fillText("NATHAN",cx,cy+10);
+
+    /* órbita palabras */
+    angle+=0.01;
+    ctx.font="20px Arial";
+    for(let i=0;i<words.length;i++){
+        let ang=angle+i*(Math.PI*2/words.length);
+        let x=cx+Math.cos(ang)*220;
+        let y=cy+Math.sin(ang)*90;
+        ctx.fillText(words[i],x,y);
+    }
+
+    requestAnimationFrame(draw);
+}
+
+draw();
+</script>
+
+</body>
+</html>
