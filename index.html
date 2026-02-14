@@ -13,7 +13,6 @@ body{
     font-family: Arial, sans-serif;
 }
 
-/* TÍTULO */
 #title{
     position:absolute;
     top:5%;
@@ -23,28 +22,23 @@ body{
     font-weight:bold;
     color:white;
     z-index:10;
-    text-shadow:
-        0 0 8px #00ffff,
-        0 0 16px #00ffff,
-        0 0 32px #0088ff;
+    text-shadow:0 0 20px cyan;
 }
 
-/* PALABRAS */
 .loveText{
     position:absolute;
     font-size:16px;
     color:white;
     pointer-events:none;
     text-shadow:
-        0 0 6px #ff66ff,
-        0 0 12px #ff1493,
-        0 0 24px #ff1493;
+        0 0 8px #ff66ff,
+        0 0 18px #ff1493;
     animation: floatUp linear forwards;
 }
 
 @keyframes floatUp{
-    from { transform: translateY(0); opacity:1; }
-    to { transform: translateY(-120vh); opacity:0; }
+    from{transform:translateY(0);opacity:1;}
+    to{transform:translateY(-120vh);opacity:0;}
 }
 </style>
 </head>
@@ -55,141 +49,98 @@ body{
 <script src="https://unpkg.com/three@0.160.0/build/three.min.js"></script>
 
 <script>
-/* ================= ESCENA ================= */
 
+/* ESCENA */
 const scene = new THREE.Scene();
 
 const camera = new THREE.PerspectiveCamera(
-    75,
-    window.innerWidth/window.innerHeight,
-    0.1,
-    1000
+75,
+window.innerWidth/window.innerHeight,
+0.1,
+1000
 );
 
 const renderer = new THREE.WebGLRenderer({antialias:true});
 renderer.setSize(window.innerWidth, window.innerHeight);
-
-/* LIMITAR RESOLUCIÓN EN MÓVIL */
-renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5));
-
+renderer.setPixelRatio(1); // 🔥 fuerza estabilidad móvil
 document.body.appendChild(renderer.domElement);
 
-camera.position.z = 10;
+camera.position.z = 12;
 
-/* ================= GALAXIA ESPIRAL OPTIMIZADA ================= */
-
-const galaxyGeometry = new THREE.BufferGeometry();
-const starCount = 2500; // optimizado móvil
-const positions = [];
-
-for(let i=0;i<starCount;i++){
-    const radius = Math.random()*300;
-    const angle = radius * 0.03;
-    const branch = (i%4)/4 * Math.PI*2;
-
-    const x = Math.cos(angle + branch) * radius;
-    const y = (Math.random()-0.5)*8;
-    const z = Math.sin(angle + branch) * radius;
-
-    positions.push(x,y,z);
-}
-
-galaxyGeometry.setAttribute(
-    'position',
-    new THREE.Float32BufferAttribute(positions,3)
-);
-
-const galaxyMaterial = new THREE.PointsMaterial({
-    size:0.6,
-    color:0xffffff,
-    depthWrite:false
+/* FONDO TIPO GALAXIA SIN PARTICULAS */
+const spaceGeometry = new THREE.SphereGeometry(500,32,32);
+const spaceMaterial = new THREE.MeshBasicMaterial({
+    color:0x050510,
+    side:THREE.BackSide
 });
+const space = new THREE.Mesh(spaceGeometry, spaceMaterial);
+scene.add(space);
 
-const galaxy = new THREE.Points(galaxyGeometry, galaxyMaterial);
-scene.add(galaxy);
-
-/* ================= PLANETA ================= */
-
+/* PLANETA */
 const planetGeometry = new THREE.SphereGeometry(3,64,64);
-
 const planetMaterial = new THREE.MeshStandardMaterial({
     color:0x1e90ff,
-    roughness:0.8,
-    metalness:0.2,
-    emissive:0x001133,
+    roughness:0.7,
+    metalness:0.3,
+    emissive:0x001144,
     emissiveIntensity:0.6
 });
-
 const planet = new THREE.Mesh(planetGeometry, planetMaterial);
 scene.add(planet);
 
-/* ================= AURA COMPATIBLE MÓVIL ================= */
-
-const glowTexture = new THREE.TextureLoader().load(
-    "https://threejs.org/examples/textures/sprites/glow.png"
-);
-
-const glowMaterial = new THREE.SpriteMaterial({
-    map: glowTexture,
+/* AURA SIMPLE Y ESTABLE */
+const auraGeometry = new THREE.SphereGeometry(3.5,64,64);
+const auraMaterial = new THREE.MeshBasicMaterial({
     color:0x00ffff,
     transparent:true,
-    blending:THREE.AdditiveBlending
+    opacity:0.2
 });
+const aura = new THREE.Mesh(auraGeometry, auraMaterial);
+scene.add(aura);
 
-const glow = new THREE.Sprite(glowMaterial);
-glow.scale.set(10,10,1);
-scene.add(glow);
-
-/* ================= LUCES ================= */
-
+/* LUZ */
 const light = new THREE.PointLight(0xffffff,2);
 light.position.set(10,10,10);
 scene.add(light);
 
-/* ================= ANIMACIÓN ================= */
-
+/* ANIMACIÓN */
 function animate(){
     requestAnimationFrame(animate);
 
-    galaxy.rotation.y += 0.0004;
-    planet.rotation.y += 0.002;
-
-    glow.position.copy(planet.position);
+    planet.rotation.y += 0.003;
+    aura.rotation.y += 0.003;
 
     renderer.render(scene,camera);
 }
-
 animate();
 
-/* ================= RESPONSIVE ================= */
-
+/* RESPONSIVE */
 window.addEventListener('resize',()=>{
     camera.aspect = window.innerWidth/window.innerHeight;
     camera.updateProjectionMatrix();
     renderer.setSize(window.innerWidth, window.innerHeight);
 });
 
-/* ================= PALABRAS ROMÁNTICAS ================= */
-
+/* PALABRAS */
 const palabras=[
-    "Eres mi universo",
-    "Te amo Nathan",
-    "Siempre contigo",
-    "Mi estrella favorita",
-    "Mi corazón es tuyo",
-    "Eres mi destino"
+"Eres mi universo",
+"Te amo Nathan",
+"Siempre contigo",
+"Mi estrella favorita",
+"Mi corazón es tuyo",
+"Eres mi destino"
 ];
 
 function crearTexto(){
-    const text=document.createElement("div");
-    text.className="loveText";
-    text.innerText=palabras[Math.floor(Math.random()*palabras.length)];
-    text.style.left=Math.random()*window.innerWidth+"px";
-    text.style.top="100vh";
-    text.style.animationDuration=(4+Math.random()*3)+"s";
-    document.body.appendChild(text);
+const text=document.createElement("div");
+text.className="loveText";
+text.innerText=palabras[Math.floor(Math.random()*palabras.length)];
+text.style.left=Math.random()*window.innerWidth+"px";
+text.style.top="100vh";
+text.style.animationDuration=(4+Math.random()*3)+"s";
+document.body.appendChild(text);
 
-    setTimeout(()=>text.remove(),7000);
+setTimeout(()=>text.remove(),7000);
 }
 
 setInterval(crearTexto,1200);
