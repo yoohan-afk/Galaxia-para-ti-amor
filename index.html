@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Galaxia Nathan</title>
+
+<style>
+body{
+    margin:0;
+    overflow:hidden;
+    background:black;
+    font-family: Arial, Helvetica, sans-serif;
+}
+#mensaje{
+    position:absolute;
+    top:20px;
+    width:100%;
+    text-align:center;
+    color:white;
+    font-size:28px;
+    font-weight:bold;
+}
+</style>
+</head>
+
+<body>
+
+<div id="mensaje">Nathan 💛 eres mi chico hermoso</div>
+<canvas id="canvas"></canvas>
+
+<script>
+const canvas = document.getElementById("canvas");
+const ctx = canvas.getContext("2d");
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
+
+/* estrellas realistas */
+let stars=[];
+for(let i=0;i<1200;i++){
+    stars.push({
+        x:Math.random()*canvas.width,
+        y:Math.random()*canvas.height,
+        size:Math.random()*1.5,
+        speed:Math.random()*0.3
+    });
+}
+
+/* palabras */
+let words=[
+"hermoso","mi niño","mi amor","mi cielo",
+"mi príncipe","mi rey","mi bebé",
+"te adoro","te quiero","mi vida",
+"mi universo","mi chico","mi todo"
+];
+
+let angle=0;
+let neonPulse=0;
+
+function drawStars(){
+    for(let s of stars){
+        ctx.beginPath();
+        ctx.arc(s.x,s.y,s.size,0,Math.PI*2);
+        ctx.fillStyle="white";
+        ctx.fill();
+        s.y+=s.speed;
+        if(s.y>canvas.height) s.y=0;
+    }
+}
+
+function drawGalaxy(cx,cy){
+    let grad=ctx.createRadialGradient(cx,cy,0,cx,cy,250);
+    grad.addColorStop(0,"#fff");
+    grad.addColorStop(0.2,"#ff9df7");
+    grad.addColorStop(0.4,"#b66cff");
+    grad.addColorStop(0.7,"#2a0055");
+    grad.addColorStop(1,"transparent");
+    ctx.beginPath();
+    ctx.arc(cx,cy,250,0,Math.PI*2);
+    ctx.fillStyle=grad;
+    ctx.fill();
+}
+
+function drawPlanet(cx,cy){
+    let grad=ctx.createRadialGradient(cx-40,cy-40,20,cx,cy,120);
+    grad.addColorStop(0,"#ffffff");
+    grad.addColorStop(0.3,"#c084ff");
+    grad.addColorStop(0.6,"#7b2cff");
+    grad.addColorStop(1,"#2b004f");
+    ctx.beginPath();
+    ctx.arc(cx,cy,90,0,Math.PI*2);
+    ctx.fillStyle=grad;
+    ctx.fill();
+}
+
+function drawNeonText(text,x,y,alpha){
+    ctx.globalAlpha=alpha;
+    ctx.font="20px Arial";
+    ctx.textAlign="center";
+    ctx.fillStyle="#ff8afc";
+    ctx.shadowColor="#ff00ff";
+    ctx.shadowBlur=20;
+    ctx.fillText(text,x,y);
+    ctx.shadowBlur=0;
+    ctx.globalAlpha=1;
+}
+
+function draw(){
+    ctx.fillStyle="black";
+    ctx.fillRect(0,0,canvas.width,canvas.height);
+
+    drawStars();
+
+    let cx=canvas.width/2;
+    let cy=canvas.height/2+80;
+
+    drawGalaxy(cx,cy);
+    drawPlanet(cx,cy);
+
+    ctx.fillStyle="white";
+    ctx.font="bold 34px Arial";
+    ctx.fillText("NATHAN",cx,cy+10);
+
+    angle+=0.01;
+    neonPulse+=0.03;
+    let alpha=(Math.sin(neonPulse)+1)/2;
+
+    for(let i=0;i<words.length;i++){
+        let ang=angle+i*(Math.PI*2/words.length);
+        let x=cx+Math.cos(ang)*230;
+        let y=cy+Math.sin(ang)*110;
+        drawNeonText(words[i],x,y,alpha);
+    }
+
+    requestAnimationFrame(draw);
+}
+
+draw();
+</script>
+
+</body>
+</html>
