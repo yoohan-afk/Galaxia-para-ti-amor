@@ -9,162 +9,130 @@
 body{
   margin:0;
   overflow:hidden;
-  background:#000;
-  font-family:Arial, Helvetica, sans-serif;
+  background:black;
+  font-family: Arial, Helvetica, sans-serif;
 }
 
-/* CANVAS estrellas */
-canvas{
-  position:fixed;
-  top:0;
-  left:0;
-  z-index:0;
-}
-
-/* TEXTO SUPERIOR */
-h1{
-  position:fixed;
+#titulo{
+  position:absolute;
   top:20px;
   width:100%;
   text-align:center;
-  color:#f3c8ff;
-  text-shadow:0 0 15px #d78bff,0 0 30px #b34dff;
-  font-size:20px;
-  z-index:2;
+  color:#ffc6ff;
+  font-size:22px;
+  z-index:10;
+  text-shadow:0 0 10px #ff8dfc,0 0 25px #ff8dfc;
 }
 
-/* CONTENEDOR PLANETA */
-#scene{
-  position:absolute;
-  bottom:12vh;
-  left:50%;
-  transform:translateX(-50%);
-  width:80vw;
-  height:80vw;
-  max-width:420px;
-  max-height:420px;
-}
-
-/* PLANETA */
-#planet{
-  position:absolute;
-  width:120px;
-  height:120px;
-  border-radius:50%;
-  left:50%;
-  top:50%;
-  transform:translate(-50%,-50%);
-  background:radial-gradient(circle at 30% 30%, #f7d6ff, #a94dff, #2a0044);
-  box-shadow:0 0 60px #b34dff,0 0 120px #6a00ff;
-}
-
-/* ORBITA */
-#orbit{
-  position:absolute;
-  width:100%;
-  height:100%;
-  border-radius:50%;
-  animation:spin 35s linear infinite;
-}
-
-/* PALABRAS */
-.word{
-  position:absolute;
-  color:#ffdfff;
-  font-size:14px;
-  text-shadow:0 0 8px #ff9bff,0 0 18px #d14dff;
-  animation:blink 3s infinite;
-}
-
-@keyframes spin{
-  from{transform:rotate(0deg);}
-  to{transform:rotate(360deg);}
-}
-
-@keyframes blink{
-  0%,100%{opacity:1;}
-  50%{opacity:0.2;}
-}
+canvas{ display:block; }
 </style>
 </head>
 
 <body>
+<div id="titulo">Para Nathan, el más hermoso del universo 💜</div>
 
-<h1>Para Nathan, el más hermoso del universo 💜</h1>
-
-<canvas id="stars"></canvas>
-
-<div id="scene">
-  <div id="orbit"></div>
-  <div id="planet"></div>
-</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r134/three.min.js"></script>
 
 <script>
-/* ESTRELLAS (CORREGIDO PARA IPHONE) */
-const canvas=document.getElementById("stars");
-const ctx=canvas.getContext("2d");
+// escena
+const scene = new THREE.Scene();
 
-function resizeCanvas(){
-  canvas.width=window.innerWidth;
-  canvas.height=window.innerHeight;
+// camara optimizada pa celular
+const camera = new THREE.PerspectiveCamera(70, innerWidth/innerHeight, 0.1, 2000);
+camera.position.z = 18;
+
+// render
+const renderer = new THREE.WebGLRenderer({antialias:true});
+renderer.setSize(innerWidth, innerHeight);
+document.body.appendChild(renderer.domElement);
+
+// luces
+const light = new THREE.PointLight(0xffccff, 2, 300);
+light.position.set(0,0,0);
+scene.add(light);
+
+const ambient = new THREE.AmbientLight(0x8888ff,1);
+scene.add(ambient);
+
+//// PLANETA REALISTA
+const textureLoader = new THREE.TextureLoader();
+const planetTexture = textureLoader.load("https://threejsfundamentals.org/threejs/resources/images/earth-day.jpg");
+
+const planetGeo = new THREE.SphereGeometry(3,64,64);
+const planetMat = new THREE.MeshStandardMaterial({
+  map:planetTexture,
+  emissive:0x6611ff,
+  emissiveIntensity:0.3
+});
+const planet = new THREE.Mesh(planetGeo, planetMat);
+scene.add(planet);
+
+//// ESTRELLAS 3D
+const starGeo = new THREE.BufferGeometry();
+const starCount = 3000;
+const positions = [];
+
+for(let i=0;i<starCount;i++){
+  positions.push(
+    (Math.random()-0.5)*1000,
+    (Math.random()-0.5)*1000,
+    (Math.random()-0.5)*1000
+  );
 }
-resizeCanvas();
-window.addEventListener("resize",resizeCanvas);
 
-let stars=[];
-for(let i=0;i<900;i++){   // menos estrellas
-  stars.push({
-    x:Math.random()*canvas.width,
-    y:Math.random()*canvas.height,
-    size:Math.random()*2+0.5 // más grandes
-  });
-}
+starGeo.setAttribute('position', new THREE.Float32BufferAttribute(positions,3));
+const starMat = new THREE.PointsMaterial({color:0xffffff,size:1});
+const stars = new THREE.Points(starGeo, starMat);
+scene.add(stars);
 
-function drawStars(){
-  ctx.clearRect(0,0,canvas.width,canvas.height);
-  ctx.fillStyle="white";
-  stars.forEach(s=>{
-    ctx.beginPath();
-    ctx.arc(s.x,s.y,s.size,0,Math.PI*2);
-    ctx.fill();
-  });
-  requestAnimationFrame(drawStars);
-}
-drawStars();
-
-/* PALABRAS EN ORBITA */
-const words=[
-"Mi cielo","Mi bebé","Hermoso","Te amo infinito",
-"Mi vida","Mi niño","Mi universo","Mi todo",
-"Mi amor","Mi estrella","Mi felicidad","Mi mundo"
+//// TEXTO EN ORBITA 3D
+const palabras = [
+"Mi amor","Mi universo","Mi cielo","Mi bebé","Mi estrella",
+"Mi felicidad","Mi todo","Mi príncipe","Mi hermoso",
+"Mi razón","Mi alegría","Mi vida","Mi infinito"
 ];
 
-const orbit=document.getElementById("orbit");
+const loader = new THREE.FontLoader();
+loader.load('https://threejs.org/examples/fonts/helvetiker_regular.typeface.json', function(font){
 
-function createWords(){
-  orbit.innerHTML="";
-  const size=orbit.offsetWidth;
-  const center=size/2;
-  const radius=size/2-30;
+  palabras.forEach((palabra,i)=>{
+    const textGeo = new THREE.TextGeometry(palabra,{
+      font:font,
+      size:0.5,
+      height:0.05
+    });
 
-  for(let i=0;i<40;i++){
-    let w=document.createElement("div");
-    w.className="word";
-    w.innerText=words[Math.floor(Math.random()*words.length)];
+    const textMat = new THREE.MeshBasicMaterial({color:0xffccff});
+    const mesh = new THREE.Mesh(textGeo,textMat);
 
-    let angle=Math.random()*Math.PI*2;
-    let x=center+radius*Math.cos(angle);
-    let y=center+radius*Math.sin(angle);
+    const angle = (i/palabras.length)*Math.PI*2;
+    const radius = 8;
 
-    w.style.left=x+"px";
-    w.style.top=y+"px";
-    w.style.animationDelay=Math.random()*3+"s";
+    mesh.position.x = Math.cos(angle)*radius;
+    mesh.position.z = Math.sin(angle)*radius;
+    mesh.lookAt(planet.position);
 
-    orbit.appendChild(w);
-  }
+    scene.add(mesh);
+  });
+});
+
+//// ANIMACION
+function animate(){
+  requestAnimationFrame(animate);
+
+  planet.rotation.y += 0.002;
+  stars.rotation.y += 0.0005;
+
+  renderer.render(scene,camera);
 }
-createWords();
-window.addEventListener("resize",createWords);
+animate();
+
+//// RESPONSIVE CELULAR
+onresize = ()=>{
+  camera.aspect = innerWidth/innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(innerWidth, innerHeight);
+};
 </script>
 
 </body>
