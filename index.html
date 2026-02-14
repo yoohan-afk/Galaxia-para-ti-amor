@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Para Nathan 💙</title>
+<style>
+    body {
+        margin: 0;
+        overflow: hidden;
+        background: black;
+        font-family: Arial, sans-serif;
+    }
+
+    #overlay {
+        position: absolute;
+        top: 5%;
+        width: 100%;
+        text-align: center;
+        color: white;
+        font-size: 28px;
+        font-weight: bold;
+        text-shadow: 0 0 20px cyan;
+        z-index: 10;
+    }
+
+    .loveText {
+        position: absolute;
+        color: white;
+        font-size: 14px;
+        text-shadow: 0 0 10px pink;
+        pointer-events: none;
+    }
+</style>
+</head>
+<body>
+
+<div id="overlay">🌌 Para Nathan 💙</div>
+
+<script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
+
+<script>
+let scene = new THREE.Scene();
+let camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 1000);
+let renderer = new THREE.WebGLRenderer({antialias:true});
+renderer.setSize(window.innerWidth, window.innerHeight);
+document.body.appendChild(renderer.domElement);
+
+// Galaxia (estrellas)
+let starGeometry = new THREE.BufferGeometry();
+let starCount = 2000;
+let positions = [];
+
+for (let i = 0; i < starCount; i++) {
+    positions.push((Math.random() - 0.5) * 2000);
+    positions.push((Math.random() - 0.5) * 2000);
+    positions.push((Math.random() - 0.5) * 2000);
+}
+
+starGeometry.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
+let starMaterial = new THREE.PointsMaterial({color: 0xffffff});
+let stars = new THREE.Points(starGeometry, starMaterial);
+scene.add(stars);
+
+// Planeta
+let planetGeometry = new THREE.SphereGeometry(2, 64, 64);
+let planetMaterial = new THREE.MeshStandardMaterial({
+    color: 0x00aaff,
+    emissive: 0x0088ff,
+    emissiveIntensity: 0.6
+});
+let planet = new THREE.Mesh(planetGeometry, planetMaterial);
+scene.add(planet);
+
+// Aura brillante
+let auraGeometry = new THREE.SphereGeometry(2.5, 64, 64);
+let auraMaterial = new THREE.MeshBasicMaterial({
+    color: 0x00ffff,
+    transparent: true,
+    opacity: 0.3
+});
+let aura = new THREE.Mesh(auraGeometry, auraMaterial);
+scene.add(aura);
+
+// Luz
+let light = new THREE.PointLight(0xffffff, 2);
+light.position.set(5,5,5);
+scene.add(light);
+
+camera.position.z = 6;
+
+// Animación
+function animate() {
+    requestAnimationFrame(animate);
+
+    planet.rotation.y += 0.01;
+    stars.rotation.y += 0.0005;
+    aura.scale.x = 1 + Math.sin(Date.now()*0.002)*0.05;
+    aura.scale.y = 1 + Math.sin(Date.now()*0.002)*0.05;
+    aura.scale.z = 1 + Math.sin(Date.now()*0.002)*0.05;
+
+    renderer.render(scene, camera);
+}
+animate();
+
+// Ajuste para móvil
+window.addEventListener('resize', () => {
+    camera.aspect = window.innerWidth/window.innerHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(window.innerWidth, window.innerHeight);
+});
+
+// Palabras de amor
+const palabras = [
+    "Te amo",
+    "Eres increíble",
+    "Mi universo",
+    "Mi todo",
+    "Siempre contigo",
+    "Eres especial"
+];
+
+function crearTexto() {
+    let text = document.createElement("div");
+    text.className = "loveText";
+    text.innerText = palabras[Math.floor(Math.random()*palabras.length)];
+
+    text.style.left = Math.random()*window.innerWidth + "px";
+    text.style.top = window.innerHeight + "px";
+
+    document.body.appendChild(text);
+
+    let move = setInterval(() => {
+        text.style.top = (parseFloat(text.style.top) - 1) + "px";
+        if (parseFloat(text.style.top) < -20) {
+            clearInterval(move);
+            text.remove();
+        }
+    }, 16);
+}
+
+setInterval(crearTexto, 1000);
+</script>
+
+</body>
+</html>
