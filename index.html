@@ -10,39 +10,40 @@ body{
     margin:0;
     overflow:hidden;
     background:black;
-    font-family: 'Arial', sans-serif;
+    font-family: Arial, sans-serif;
 }
 
+/* TÍTULO */
 #title{
     position:absolute;
     top:5%;
     width:100%;
     text-align:center;
-    font-size:30px;
+    font-size:28px;
     font-weight:bold;
     color:white;
     z-index:10;
     text-shadow:
-        0 0 10px #00ffff,
-        0 0 20px #00ffff,
-        0 0 40px #0088ff;
+        0 0 8px #00ffff,
+        0 0 16px #00ffff,
+        0 0 32px #0088ff;
 }
 
+/* PALABRAS */
 .loveText{
     position:absolute;
     font-size:16px;
     color:white;
     pointer-events:none;
     text-shadow:
-        0 0 5px #ff66ff,
-        0 0 10px #ff66ff,
-        0 0 20px #ff1493,
-        0 0 40px #ff1493;
+        0 0 6px #ff66ff,
+        0 0 12px #ff1493,
+        0 0 24px #ff1493;
     animation: floatUp linear forwards;
 }
 
 @keyframes floatUp{
-    from { transform: translateY(0px); opacity:1; }
+    from { transform: translateY(0); opacity:1; }
     to { transform: translateY(-120vh); opacity:0; }
 }
 </style>
@@ -54,38 +55,54 @@ body{
 <script src="https://unpkg.com/three@0.160.0/build/three.min.js"></script>
 
 <script>
+/* ================= ESCENA ================= */
+
 const scene = new THREE.Scene();
-const camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 2000);
+
+const camera = new THREE.PerspectiveCamera(
+    75,
+    window.innerWidth/window.innerHeight,
+    0.1,
+    1000
+);
+
 const renderer = new THREE.WebGLRenderer({antialias:true});
 renderer.setSize(window.innerWidth, window.innerHeight);
-renderer.setPixelRatio(window.devicePixelRatio);
+
+/* LIMITAR RESOLUCIÓN EN MÓVIL */
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5));
+
 document.body.appendChild(renderer.domElement);
 
-camera.position.z = 12;
+camera.position.z = 10;
 
-/* ================= GALAXIA ESPIRAL ================= */
+/* ================= GALAXIA ESPIRAL OPTIMIZADA ================= */
 
 const galaxyGeometry = new THREE.BufferGeometry();
-const starCount = 6000;
+const starCount = 2500; // optimizado móvil
 const positions = [];
 
 for(let i=0;i<starCount;i++){
-    const radius = Math.random()*400;
-    const angle = radius * 0.02;
-    const branchAngle = (i%5)/5 * Math.PI*2;
+    const radius = Math.random()*300;
+    const angle = radius * 0.03;
+    const branch = (i%4)/4 * Math.PI*2;
 
-    const x = Math.cos(angle + branchAngle) * radius;
-    const y = (Math.random()-0.5)*10;
-    const z = Math.sin(angle + branchAngle) * radius;
+    const x = Math.cos(angle + branch) * radius;
+    const y = (Math.random()-0.5)*8;
+    const z = Math.sin(angle + branch) * radius;
 
     positions.push(x,y,z);
 }
 
-galaxyGeometry.setAttribute('position', new THREE.Float32BufferAttribute(positions,3));
+galaxyGeometry.setAttribute(
+    'position',
+    new THREE.Float32BufferAttribute(positions,3)
+);
 
 const galaxyMaterial = new THREE.PointsMaterial({
-    size:1.2,
-    color:0xffffff
+    size:0.6,
+    color:0xffffff,
+    depthWrite:false
 });
 
 const galaxy = new THREE.Points(galaxyGeometry, galaxyMaterial);
@@ -93,55 +110,34 @@ scene.add(galaxy);
 
 /* ================= PLANETA ================= */
 
-const planetGeometry = new THREE.SphereGeometry(3,128,128);
+const planetGeometry = new THREE.SphereGeometry(3,64,64);
 
 const planetMaterial = new THREE.MeshStandardMaterial({
     color:0x1e90ff,
-    roughness:0.7,
+    roughness:0.8,
     metalness:0.2,
-    emissive:0x002244,
+    emissive:0x001133,
     emissiveIntensity:0.6
 });
 
 const planet = new THREE.Mesh(planetGeometry, planetMaterial);
 scene.add(planet);
 
-/* ================= AURA REALISTA ================= */
+/* ================= AURA COMPATIBLE MÓVIL ================= */
 
-const glowGeometry = new THREE.SphereGeometry(3.6,128,128);
+const glowTexture = new THREE.TextureLoader().load(
+    "https://threejs.org/examples/textures/sprites/glow.png"
+);
 
-const glowMaterial = new THREE.ShaderMaterial({
-    uniforms:{
-        c:{value:0.5},
-        p:{value:4.0},
-        glowColor:{value:new THREE.Color(0x00ffff)},
-        viewVector:{value:camera.position}
-    },
-    vertexShader:`
-        uniform vec3 viewVector;
-        uniform float c;
-        uniform float p;
-        varying float intensity;
-        void main(){
-            vec3 vNormal = normalize(normalMatrix * normal);
-            vec3 vNormel = normalize(normalMatrix * viewVector);
-            intensity = pow(c - dot(vNormal, vNormel), p);
-            gl_Position = projectionMatrix * modelViewMatrix * vec4(position,1.0);
-        }
-    `,
-    fragmentShader:`
-        uniform vec3 glowColor;
-        varying float intensity;
-        void main(){
-            gl_FragColor = vec4(glowColor, intensity);
-        }
-    `,
-    side:THREE.BackSide,
-    blending:THREE.AdditiveBlending,
-    transparent:true
+const glowMaterial = new THREE.SpriteMaterial({
+    map: glowTexture,
+    color:0x00ffff,
+    transparent:true,
+    blending:THREE.AdditiveBlending
 });
 
-const glow = new THREE.Mesh(glowGeometry, glowMaterial);
+const glow = new THREE.Sprite(glowMaterial);
+glow.scale.set(10,10,1);
 scene.add(glow);
 
 /* ================= LUCES ================= */
@@ -155,12 +151,14 @@ scene.add(light);
 function animate(){
     requestAnimationFrame(animate);
 
-    galaxy.rotation.y += 0.0005;
-    planet.rotation.y += 0.003;
-    glow.rotation.y += 0.003;
+    galaxy.rotation.y += 0.0004;
+    planet.rotation.y += 0.002;
+
+    glow.position.copy(planet.position);
 
     renderer.render(scene,camera);
 }
+
 animate();
 
 /* ================= RESPONSIVE ================= */
@@ -168,18 +166,18 @@ animate();
 window.addEventListener('resize',()=>{
     camera.aspect = window.innerWidth/window.innerHeight;
     camera.updateProjectionMatrix();
-    renderer.setSize(window.innerWidth,window.innerHeight);
+    renderer.setSize(window.innerWidth, window.innerHeight);
 });
 
-/* ================= PALABRAS CON GLOW ================= */
+/* ================= PALABRAS ROMÁNTICAS ================= */
 
 const palabras=[
     "Eres mi universo",
     "Te amo Nathan",
     "Siempre contigo",
     "Mi estrella favorita",
-    "Eres mi destino",
-    "Mi corazón es tuyo"
+    "Mi corazón es tuyo",
+    "Eres mi destino"
 ];
 
 function crearTexto(){
@@ -195,6 +193,7 @@ function crearTexto(){
 }
 
 setInterval(crearTexto,1200);
+
 </script>
 
 </body>
