@@ -1,1 +1,0 @@
-# Galaxia-para-ti-amor
