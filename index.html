@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Flores Amarillas</title>
+
+<style>
+body {
+    margin: 0;
+    background: #000;
+    overflow: hidden;
+    font-family: Arial, sans-serif;
+}
+
+/* TEXTO */
+h1 {
+    position: absolute;
+    top: 8%;
+    width: 100%;
+    text-align: center;
+    font-size: 1.8em;
+    color: #ffd54f;
+    text-shadow: 0 0 15px #ffcc00, 0 0 30px #ff9900;
+}
+
+/* CONTENEDOR RAMO */
+.bouquet {
+    position: absolute;
+    bottom: 5%;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+}
+
+/* GIRASOL */
+.flower {
+    position: relative;
+    width: 90px;
+    height: 90px;
+    margin: -20px;
+}
+
+/* CENTRO */
+.center {
+    position: absolute;
+    width: 35px;
+    height: 35px;
+    background: #4b2e05;
+    border-radius: 50%;
+    top: 27px;
+    left: 27px;
+    z-index: 2;
+}
+
+/* PÉTALOS */
+.petal {
+    position: absolute;
+    width: 30px;
+    height: 60px;
+    background: orange;
+    border-radius: 50%;
+    left: 30px;
+    top: 0;
+    transform-origin: center bottom;
+}
+
+/* TALLO */
+.stem {
+    position: absolute;
+    width: 5px;
+    height: 80px;
+    background: #3cb371;
+    left: 42px;
+    top: 80px;
+}
+
+/* HOJAS */
+.leaf {
+    position: absolute;
+    width: 30px;
+    height: 15px;
+    background: #2e8b57;
+    border-radius: 15px;
+}
+
+.leaf.left {
+    top: 110px;
+    left: 15px;
+    transform: rotate(-30deg);
+}
+
+.leaf.right {
+    top: 120px;
+    left: 45px;
+    transform: rotate(30deg);
+}
+
+/* BRILLOS */
+.sparkle {
+    position: absolute;
+    width: 4px;
+    height: 4px;
+    background: gold;
+    border-radius: 50%;
+    animation: fall linear infinite;
+}
+
+@keyframes fall {
+    from {
+        transform: translateY(-10px);
+        opacity: 1;
+    }
+    to {
+        transform: translateY(100vh);
+        opacity: 0;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<h1>🌻 Para Nathan, Tus flores amarillas 🌻</h1>
+
+<div class="bouquet" id="bouquet"></div>
+
+<script>
+function createFlower() {
+    const flower = document.createElement('div');
+    flower.className = 'flower';
+
+    for (let i = 0; i < 12; i++) {
+        let petal = document.createElement('div');
+        petal.className = 'petal';
+        petal.style.transform = `rotate(${i * 30}deg)`;
+        flower.appendChild(petal);
+    }
+
+    let center = document.createElement('div');
+    center.className = 'center';
+    flower.appendChild(center);
+
+    let stem = document.createElement('div');
+    stem.className = 'stem';
+    flower.appendChild(stem);
+
+    let leaf1 = document.createElement('div');
+    leaf1.className = 'leaf left';
+
+    let leaf2 = document.createElement('div');
+    leaf2.className = 'leaf right';
+
+    flower.appendChild(leaf1);
+    flower.appendChild(leaf2);
+
+    return flower;
+}
+
+/* RAMO (forma triangular bonita) */
+const bouquet = document.getElementById("bouquet");
+
+const positions = [-60, -30, 0, 30, 60];
+
+positions.forEach((offset, i) => {
+    const f = createFlower();
+    f.style.transform = `translateY(${Math.abs(offset)/2}px)`;
+    bouquet.appendChild(f);
+});
+
+/* BRILLITOS */
+function sparkle() {
+    const s = document.createElement('div');
+    s.className = 'sparkle';
+    s.style.left = Math.random() * window.innerWidth + 'px';
+    s.style.animationDuration = (2 + Math.random() * 3) + 's';
+
+    document.body.appendChild(s);
+    setTimeout(() => s.remove(), 5000);
+}
+
+setInterval(sparkle, 120);
+</script>
+
+</body>
+</html>
