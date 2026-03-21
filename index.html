@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Flores Amarillas</title>
+
+<style>
+html, body {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    background-color: #000 !important;
+    overflow: hidden;
+    font-family: Arial, sans-serif;
+}
+
+/* TEXTO */
+h1 {
+    position: absolute;
+    top: 6%;
+    width: 100%;
+    text-align: center;
+    font-size: 2em;
+    color: #ffd54f;
+    text-shadow: 0 0 20px #ffcc00, 0 0 50px #ff9900;
+    z-index: 10;
+}
+
+/* CONTENEDOR */
+.container {
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+    height: 60%;
+    display: flex;
+    justify-content: center;
+    align-items: flex-end;
+}
+
+/* GIRASOL */
+.flower {
+    position: relative;
+    width: 200px;
+    height: 200px;
+    margin: -60px;
+}
+
+/* GLOW */
+.glow {
+    position: absolute;
+    width: 200px;
+    height: 200px;
+    background: radial-gradient(circle, rgba(255,200,0,0.8), transparent 70%);
+    border-radius: 50%;
+    z-index: 0;
+}
+
+/* CENTRO */
+.center {
+    position: absolute;
+    width: 80px;
+    height: 80px;
+    background: #4b2e05;
+    border-radius: 50%;
+    top: 60px;
+    left: 60px;
+    z-index: 2;
+}
+
+/* PÉTALOS */
+.petal {
+    position: absolute;
+    width: 70px;
+    height: 130px;
+    background: #ff9800;
+    border-radius: 50%;
+    left: 65px;
+    top: 0;
+    transform-origin: center bottom;
+    box-shadow: 0 0 25px rgba(255,200,0,1);
+}
+
+/* TALLO */
+.stem {
+    position: absolute;
+    width: 8px;
+    height: 160px;
+    background: #4caf50;
+    top: 170px;
+    left: 96px;
+    border-radius: 6px;
+}
+
+/* HOJAS */
+.leaf {
+    position: absolute;
+    width: 60px;
+    height: 30px;
+    background: #2e8b57;
+    border-radius: 30px;
+}
+
+.leaf.left {
+    top: 230px;
+    left: 20px;
+    transform: rotate(-35deg);
+}
+
+.leaf.right {
+    top: 250px;
+    left: 110px;
+    transform: rotate(35deg);
+}
+
+/* BRILLOS */
+.sparkle {
+    position: absolute;
+    width: 4px;
+    height: 4px;
+    background: gold;
+    border-radius: 50%;
+    animation: fall linear infinite;
+}
+
+@keyframes fall {
+    from { transform: translateY(-10px); opacity: 1; }
+    to { transform: translateY(100vh); opacity: 0; }
+}
+</style>
+</head>
+
+<body>
+
+<h1>🌻 Para Nathan, Tus flores amarillas 🌻</h1>
+
+<div class="container" id="container"></div>
+
+<script>
+function createFlower(rotation) {
+    const flower = document.createElement('div');
+    flower.className = 'flower';
+    flower.style.transform = `rotate(${rotation}deg)`;
+
+    const glow = document.createElement('div');
+    glow.className = 'glow';
+    flower.appendChild(glow);
+
+    for (let i = 0; i < 12; i++) {
+        let petal = document.createElement('div');
+        petal.className = 'petal';
+        petal.style.transform = `rotate(${i * 30}deg)`;
+        flower.appendChild(petal);
+    }
+
+    const center = document.createElement('div');
+    center.className = 'center';
+    flower.appendChild(center);
+
+    const stem = document.createElement('div');
+    stem.className = 'stem';
+    flower.appendChild(stem);
+
+    const leaf1 = document.createElement('div');
+    leaf1.className = 'leaf left';
+
+    const leaf2 = document.createElement('div');
+    leaf2.className = 'leaf right';
+
+    flower.appendChild(leaf1);
+    flower.appendChild(leaf2);
+
+    return flower;
+}
+
+const container = document.getElementById("container");
+
+/* RAMO NATURAL */
+container.appendChild(createFlower(-12));
+container.appendChild(createFlower(-6));
+container.appendChild(createFlower(0));
+container.appendChild(createFlower(6));
+container.appendChild(createFlower(12));
+
+/* BRILLITOS */
+function sparkle() {
+    const s = document.createElement('div');
+    s.className = 'sparkle';
+    s.style.left = Math.random() * window.innerWidth + 'px';
+    s.style.animationDuration = (2 + Math.random() * 3) + 's';
+
+    document.body.appendChild(s);
+    setTimeout(() => s.remove(), 5000);
+}
+
+setInterval(sparkle, 100);
+</script>
+
+</body>
+</html>
